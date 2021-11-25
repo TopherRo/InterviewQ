@@ -95,14 +95,15 @@ if sum_of_baud < max_baud:
     print('The data set is power limited so {:4.4} is the highest capacity achievable'.format(sum_of_capacity))
     exit()
 
-print("We need to look deeper")
+print("The data set is neither bw or power limited so we need to find a combination of channels \
+    that satisfy both constraints")
 
 # If we reach here the opt solution is between bandwidth and power limited, we will generate another figure of merit
 # based on a weighted average of the capacity to baud ratio and the capacity to power ratios.
-# The weighting will be based on the 
+# The weighting will be based on ----
 
-weight1 = 1
-weight2 = 0
+weight1 = 250
+weight2 = 1
 
 data_set[:,7] = weight1*data_set[:,Field.CAP_TO_BAUD] + weight2*data_set[:,Field.CAP_TO_SIG_P]
 sorted_by_bw_and_power = data_set[np.argsort(-data_set[:, 7])]
@@ -113,8 +114,8 @@ sum_of_power = 0
 idx = 0
 
 for idx in range(0 , len(sorted_by_bw_and_power)):
-    #if ((sum_of_power + sorted_by_bw_and_power[idx,Field.SIG_P]) < max_sum_of_sig_p):
-    if ((sum_of_baud + sorted_by_bw_and_power[idx,Field.BAUD]) < max_baud):
+    if ((sum_of_power + sorted_by_bw_and_power[idx,Field.SIG_P]) < max_sum_of_sig_p) and \
+        ((sum_of_baud + sorted_by_bw_and_power[idx,Field.BAUD]) < max_baud):
         sum_of_baud         += sorted_by_bw_and_power[idx,Field.BAUD]
         sum_of_capacity     += sorted_by_bw_and_power[idx,Field.CAP]
         sum_of_power        += sorted_by_bw_and_power[idx,Field.SIG_P]
