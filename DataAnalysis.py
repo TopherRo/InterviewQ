@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 
 '''
-Matrix will look like
-PSD , Capacity , Baud , Sig Power , Ratio of C/B , Ratio of C/Sig Power
+python3 --version Python 3.8.10
+The data Matrix will look like
+PSD , Capacity , Baud , Sig Power , Ratio of C/B , Ratio of C/Sig Power, Row numbers, Q2 Cost
+To optimize for spectral efficency we will sort the dataset by highest capacity to baud ratio.
+We then add as many high spectral efficiency channels as we can while maintaining the total BW constraint.
+If we include a signal power constrain this problem becomes much more difficult.
+My approach has been to use both the spectral efficiency and the capacity to signal power ratio as weighted
+imputs to some sort of cost function and then apply the same algorithm.
+Calculating this cost function is not straightforward.
+Determining whether a data set is more power limited or bandwidth limited allows us to adjust the weights 
+however the two costing functions have different scales as one is based on random variable X over random 
+variable Y (X/Y), while the other is X over Z times K, (X/(Z*K)) giving them much differnet scales.   
 
 '''
 
@@ -20,13 +30,14 @@ class Field(IntEnum):
     CAP_TO_BAUD = 4
     CAP_TO_SIG_P = 5
     ROW = 6
+    COST = 7
 
-num_of_samples = 30
-max_baud = 3
-max_sum_of_sig_p = 1
+num_of_samples = 1000
+max_baud = 10
+max_sum_of_sig_p = 5
 
 # Seed the rng
-rng = np.random.default_rng(1620)
+rng = np.random.default_rng(1625)
 
 # Generate random uniform numbers between 0-1 to represent Power spectral density, Capacity, Baud
 data_set = rng.uniform(low=0.0 , high = 1.0 , size=(num_of_samples , 3))
@@ -96,7 +107,7 @@ if sum_of_baud < max_baud:
     exit()
 
 print("The data set is neither bw or power limited so we need to find a combination of channels \
-    that satisfy both constraints")
+that satisfy both constraints")
 
 # If we reach here the opt solution is between bandwidth and power limited, we will generate another figure of merit
 # based on a weighted average of the capacity to baud ratio and the capacity to power ratios.
@@ -105,8 +116,8 @@ print("The data set is neither bw or power limited so we need to find a combinat
 weight1 = 250
 weight2 = 1
 
-data_set[:,7] = weight1*data_set[:,Field.CAP_TO_BAUD] + weight2*data_set[:,Field.CAP_TO_SIG_P]
-sorted_by_bw_and_power = data_set[np.argsort(-data_set[:, 7])]
+data_set[:,Field.COST] = weight1*data_set[:,Field.CAP_TO_BAUD] + weight2*data_set[:,Field.CAP_TO_SIG_P]
+sorted_by_bw_and_power = data_set[np.argsort(-data_set[:, Field.COST])]
 
 sum_of_baud = 0
 sum_of_capacity = 0
@@ -124,12 +135,17 @@ print("Sum of the Baud" , sum_of_baud)
 print("Sum of the capacity" , sum_of_capacity)
 print("Sum of the Signal Power" , sum_of_power)
 
-#print(sorted_by_bw_and_power[:,7])
-# print(data_set[:,Field.CAP_TO_BAUD])
-# print(data_set[:,Field.CAP_TO_SIG_P])
-
-# print(bw_values_used)
-#print(power_values_used)
-# print(np.intersect1d(bw_values_used,power_values_used))
-# print(len(np.intersect1d(bw_values_used,power_values_used)))
-# print(np.setxor1d(bw_values_used,power_values_used))
+'''
+Question 1
+Sum of the Baud 9.997675832267873
+Sum of the capacity 77.70174600489302
+Sum of the Signal Power 5.478780377417459
+Question 2
+Sum of the Baud 47.01731348766844
+Sum of the capacity 110.79939280067428
+Sum of the Signal Power 4.99942971054424
+The data set is neither bw or power limited so we need to find a combination of channels that satisfy both constraints
+Sum of the Baud 9.994045562154223
+Sum of the capacity 71.96643516675702
+Sum of the Signal Power 4.559695152113895
+'''

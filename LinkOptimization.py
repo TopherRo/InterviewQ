@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 '''
+python3 --version Python 3.8.10
 Q1
 NSR = NSR non linear + NSR ASE
 NSR = B*(Pin**2) + A/Pout
@@ -28,7 +29,7 @@ B = 0.02
 L = 100
 
 Pin_opt = (( A*L / ( 2*B ))**( 1/3 ))
-print(" The optimal Pin is" , Pin_opt)
+print("The optimal Pin is" , Pin_opt)
 
 NSR_opt = B*(Pin_opt**2) + A*L/(Pin_opt)
 print("The NSR is" , NSR_opt)
@@ -76,3 +77,14 @@ plt.legend(loc="upper right")
 plt.xlabel("Pin"), plt.ylabel("NSR")
 plt.title("NSR vs Pin")
 plt.show()
+
+'''
+Output
+Question 1
+The optimal Pin is 6.299605249474365
+The NSR is 2.381101577952299
+Question 2
+Pin1 and Pin2 are 6.299605249474365 7.937005259840997
+The Gain is 125.99210498948732
+The resulting NSR is 6.160864727636918
+'''
